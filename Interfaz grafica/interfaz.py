@@ -10,7 +10,7 @@ import json
 #DEFINIR VARIABLES
 color="#80CEE1"
 #CONSUMIR API
-url = "http://localhost:8080/instrumentos"
+url = "http://localhost:3000/users"
 response = urlopen(url)
 data_json = json.loads(response.read())
 
@@ -19,7 +19,7 @@ def show_frame(frame):
 
 
 root = tkinter.Tk()
-root.geometry("600x500")
+root.geometry("750x600")
 
 root.rowconfigure(0, weight=1)
 root.columnconfigure(0, weight=1)
@@ -47,26 +47,30 @@ frame1_btn3 = tkinter.Button(verInstrumentos, text="Salir", command=root.destroy
 frame1_btn3.grid(row=4, column=2, pady=10)
 
 #CREAR TABLA
-tv = ttk.Treeview(verInstrumentos, columns=("id","precio","cantidad_stock"))
+tv = ttk.Treeview(verInstrumentos, columns=("nombre","pais","creado en","modificado en"))
 
-tv.column("#0", stretch=True, width=180, anchor=CENTER)
-tv.column("id", stretch=True,width=100,anchor=CENTER)
-tv.column("precio",stretch=True, width=150,anchor=CENTER)
-tv.column("cantidad_stock",stretch=True, width=100,anchor=CENTER)
+tv.column("#0",stretch=True, width=50,anchor=CENTER)
+tv.column("nombre",stretch=True, width=150,anchor=CENTER)
+tv.column("pais",stretch=True, width=100,anchor=CENTER)
+tv.column("creado en",stretch=True, width=150,anchor=CENTER)
+tv.column("modificado en",stretch=True, width=150,anchor=CENTER)
 
+tv.heading("#0", text="Id", anchor="center")
+tv.heading("nombre", text="Nombre", anchor="center")
+tv.heading("pais", text="Pais", anchor="center")
+tv.heading("creado en", text="Fecha Creación", anchor="center")
+tv.heading("modificado en", text="Fecha Modificación", anchor="center")
 
-tv.heading("#0", text="Nombre", anchor="center")
-tv.heading("id", text="Id", anchor="center")
-tv.heading("precio", text="Precio", anchor="center")
-tv.heading("cantidad_stock", text="Cantidad Stock", anchor="center")
+tv.column("#0", anchor="center")
 
 contador=0
 for data in data_json:    
-    nombre=data_json[contador]["nombre"]
-    id = data_json[contador]["id"]
-    precio = data_json[contador]["precio"]
-    stock = data_json[contador]["stock"]
-    tv.insert("", END, text=nombre, values=(id, precio, stock))
+    nombre=data_json[contador]["name"]
+    id=data_json[contador]["id"]
+    country=data_json[contador]["country"]
+    created_at=data_json[contador]["created_at"]
+    updated_at=data_json[contador]["updated_at"]
+    tv.insert("", END, text=id, values=(nombre, country, created_at, updated_at))
     contador=contador+1
     
 tv.grid(row=1, column=2, padx=20)
@@ -74,17 +78,25 @@ tv.grid(row=1, column=2, padx=20)
 
 # ============== AGREGAR INSTURMENTOS (FRAME 2)
 
-frame2_title = tkinter.Label(agregarInstrumentos, text="Agregar Instrumentos", bg=color)
-frame2_title.pack(fill="x")
+nombreEntry = ttk.Entry(agregarInstrumentos)
+idEntry = ttk.Entry(agregarInstrumentos)
+paisEntry = ttk.Entry(agregarInstrumentos)
+
+frame2_title = tkinter.Label(agregarInstrumentos, text="Agregar Instrumentos", bg=color, font="COMIC_SANS 40", anchor="center")
+frame2_title.grid(row = 0, column= 2)
+
+nombreEntry.grid(row = 1, column= 2)
+idEntry.grid(row = 1, column= 3)
+paisEntry.grid(row = 1, column= 4)
 
 frame2_btn = tkinter.Button(agregarInstrumentos, text="Ver Instrumentos", command=lambda:show_frame(verInstrumentos))
-frame2_btn.pack()
+frame2_btn.grid(row=2, column=2, pady=10)
 
 frame2_btn2 = tkinter.Button(agregarInstrumentos, text="Editar Instrumentos", command=lambda:show_frame(editarInstrumentos))
-frame2_btn2.pack()
+frame2_btn2.grid(row=3, column=2, pady=10)
 
 frame2_btn3 = tkinter.Button(agregarInstrumentos, text="Salir", command=root.destroy)
-frame2_btn3.pack()
+frame2_btn3.grid(row=4, column=2, pady=10)
 
 
 
