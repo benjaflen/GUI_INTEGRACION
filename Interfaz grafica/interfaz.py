@@ -4,7 +4,7 @@ from tkinter import ttk
 import tkinter
 from pyparsing import col
 import requests
-from urllib.request import urlopen
+from urllib.request import urlcleanup, urlopen
 import json
 
 #DEFINIR VARIABLES
@@ -20,6 +20,7 @@ def show_frame(frame):
 
 root = tkinter.Tk()
 root.geometry("750x600")
+# root.resizable(False, False)
 
 root.rowconfigure(0, weight=1)
 root.columnconfigure(0, weight=1)
@@ -33,6 +34,32 @@ for frame in (verInstrumentos, agregarInstrumentos, editarInstrumentos):
     frame.grid(row=0, column=0, sticky="nsew")
 
 # ============== VER INSTRUMENTOS (FRAME 1)
+
+def fn_refresh():
+    contador=0
+    for i in tv.get_children():
+        tv.delete(i)
+        
+    response = urlopen(url)
+    data_json = json.loads(response.read())    
+    
+    for i in data_json:    
+        nombre=i["name"]
+        id=i["id"]
+        country=i["country"]
+        created_at=i["created_at"]
+        updated_at=i["updated_at"]
+        tv.insert("", END, text=id, values=(nombre, country, created_at, updated_at))
+        contador=contador+1
+        
+    verInstrumentos.update()
+
+
+    
+
+refreshBtn = tkinter.Button(verInstrumentos, text="Refrescar Tabla", command=lambda:fn_refresh())
+refreshBtn.grid(row=5, column=2, pady=10)
+
 
 frame1_title = tkinter.Label(verInstrumentos, text="Mostrar Instrumentos", bg=color, font="COMIC_SANS 40", anchor="center")
 frame1_title.grid(row=0, column=2)
@@ -78,25 +105,62 @@ tv.grid(row=1, column=2, padx=20)
 
 # ============== AGREGAR INSTURMENTOS (FRAME 2)
 
-nombreEntry = ttk.Entry(agregarInstrumentos)
-idEntry = ttk.Entry(agregarInstrumentos)
-paisEntry = ttk.Entry(agregarInstrumentos)
 
-frame2_title = tkinter.Label(agregarInstrumentos, text="Agregar Instrumentos", bg=color, font="COMIC_SANS 40", anchor="center")
-frame2_title.grid(row = 0, column= 2)
+datos = {}
 
-nombreEntry.grid(row = 1, column= 2)
-idEntry.grid(row = 1, column= 3)
-paisEntry.grid(row = 1, column= 4)
 
+
+#VARIABLES PARA ALMACENAR DATOS DE LOS INPUTS
+idVariable = tkinter.StringVar()
+nomVariable = tkinter.StringVar()
+paisVariable = tkinter.StringVar()
+
+#FUNCION BOTON POST
+def fn_post():
+    # print(f'esto es id: {idVariable.get()}, esto es nombre: {nomVariable.get()}, esto es pais: {paisVariable.get()}')
+    datos = {'id' : idVariable.get(), 'name':nomVariable.get(),  'country': paisVariable.get()}
+    requests.post(url, json=datos)
+
+
+#CREAR LOS INPUTS
+idEntry = ttk.Entry(agregarInstrumentos,textvariable = idVariable)
+nombreEntry = ttk.Entry(agregarInstrumentos, textvariable = nomVariable)
+paisEntry = ttk.Entry(agregarInstrumentos,textvariable =  paisVariable)
+
+
+#BOTON DE POST
+postBtn = tkinter.Button(agregarInstrumentos, text="Agregar", command=lambda:fn_post())
+postBtn.place(x = 400, y = 120)
+
+#CREAR BOTONES DE NAVEGACIÓN
 frame2_btn = tkinter.Button(agregarInstrumentos, text="Ver Instrumentos", command=lambda:show_frame(verInstrumentos))
-frame2_btn.grid(row=2, column=2, pady=10)
-
 frame2_btn2 = tkinter.Button(agregarInstrumentos, text="Editar Instrumentos", command=lambda:show_frame(editarInstrumentos))
-frame2_btn2.grid(row=3, column=2, pady=10)
-
 frame2_btn3 = tkinter.Button(agregarInstrumentos, text="Salir", command=root.destroy)
-frame2_btn3.grid(row=4, column=2, pady=10)
+
+
+#CREAR LABELS DE LOS INPUTS
+idLabel = tkinter.Label(agregarInstrumentos, text= "ID", bg=color, font="COMIC_SANS 12", anchor="center")
+nomLabel = tkinter.Label(agregarInstrumentos, text= "NOMBRE", bg=color, font="COMIC_SANS 12", anchor="center")
+paisLabel = tkinter.Label(agregarInstrumentos, text= "PAIS", bg=color, font="COMIC_SANS 12", anchor="center")
+frame2_title = tkinter.Label(agregarInstrumentos, text="Agregar Instrumentos", bg=color, font="COMIC_SANS 40", anchor="center")
+
+
+#POSICIONAR LABELS
+frame2_title.place(x = 80, y = 0)
+idLabel.place(x = 100, y = 90)
+nomLabel.place(x = 160, y = 90)
+paisLabel.place(x = 270, y = 90)
+
+#POSICIONAR INPUTS
+idEntry.place(x = 100, y =  120, width=50)
+nombreEntry.place(x = 160, y =  120, width=100)
+paisEntry.place(x = 270, y =  120, width=100)
+
+
+#POSICIONAR BOTONES DE NAVEGACIÓN
+frame2_btn.place(x = 180, y = 150)
+frame2_btn2.place(x = 180, y = 190)
+frame2_btn3.place(x = 220, y = 230)
 
 
 
