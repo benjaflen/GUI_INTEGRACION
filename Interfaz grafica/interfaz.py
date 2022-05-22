@@ -19,8 +19,10 @@ import json
 color="#646FD4"
 rojo = "#FF0000"
 colorboton = "#9BA3EB"
-#CONSUMIR API
-url = "http://localhost:3000/instrumento"
+
+
+#CONSUMIR APIa
+url = "http://localhost:3000/get_by_almacen/2"
 response = urlopen(url)
 data_json = json.loads(response.read())
 
@@ -140,7 +142,7 @@ for data in data_json:
 tv.place(x = 100, y = 100)
 
 ####################################################################################################################################################################################
-####################################################################### AGREGAR INSTURMENTOS (FRAME 2)##############################################################################
+####################################################################### AGREGAR INSTURMENTOS (FRAME 2) #############################################################################
 ####################################################################################################################################################################################
 
 
@@ -154,9 +156,8 @@ stockVariable = tkinter.StringVar()
 
 #FUNCION BOTON POST
 def fn_post():
-    #print(f'esto es nombre: {nomVariable.get()}, esto es precio: {precioVariable.get()}, esto es stock: {stockVariable.get()}')
-    datos = {'nombre':nomVariable.get(), 'precio': precioVariable.get(), 'stock': stockVariable.get() }
-    requests.post(url, json=datos)
+    datos = {'nombre':nomVariable.get(), 'precio': precioVariable.get(), 'stock': stockVariable.get(), 'id_almacen': 2}
+    requests.post("http://localhost:3000/instrumento", json=datos)
 
 
 #CREAR LOS INPUTS
@@ -171,7 +172,6 @@ postBtn.place(x = 150, y = 210, height=50, width=300)
 
 #CREAR BOTONES DE NAVEGACIÓN
 frame2_btn = tkinter.Button(agregarInstrumentos, text="Volver", bg=colorboton , command=lambda:show_frame(verInstrumentos))
-frame2_btn2 = tkinter.Button(agregarInstrumentos, text="Editar Instrumentos",bg=colorboton , command=lambda:show_frame(editarInstrumentos))
 frame2_btn3 = tkinter.Button(agregarInstrumentos, text="Salir",bg=colorboton , command=root.destroy)
 
 
@@ -196,8 +196,7 @@ stockEntry.place(x = 150, y = 170, width=300)
 
 #POSICIONAR BOTONES DE NAVEGACIÓN
 frame2_btn.place(x = 710, y = 100, height=50,width=190)
-frame2_btn2.place(x = 710, y = 180, height=50,width=190)
-frame2_btn3.place(x = 710, y = 260, height=50,width=190)
+frame2_btn3.place(x = 710, y = 180, height=50,width=190)
 
 
 
@@ -205,11 +204,23 @@ frame2_btn3.place(x = 710, y = 260, height=50,width=190)
 ####################################################################### EDITAR INSTRUMENTOS (FRAME 3) ###############################################################################
 ####################################################################################################################################################################################
 
-ids=['Seleccione']
-
-
+ids=['Seleccione...']    
 for i in data_json:
     ids.append(i["id_instrumento"])
+    
+def frame3_llenar_comboboxId():    
+    response = urlopen(url)
+    data_json = json.loads(response.read())   
+    
+    contador = 0
+    ids.clear()
+    ids.append('Seleccione...')
+    frame3_idCombobox.set('')
+    for i in data_json:
+        ids.append(i["id_instrumento"])        
+        contador = contador+1
+    frame3_idCombobox['values']=ids
+    frame3_idCombobox.current(0)
 
 frame3_nomVariable = tkinter.StringVar()
 frame3_precioVariable = tkinter.StringVar()
@@ -227,10 +238,11 @@ frame3_stockEntry = ttk.Entry(editarInstrumentos, textvariable=frame3_stockVaria
 
 
 #CREAR BOTONES
-frame3_enviarBtn = tkinter.Button(editarInstrumentos, text="Actualizar Datos", bg=colorboton, command=lambda:fn_update())
+frame3_enviarBtn = tkinter.Button(editarInstrumentos, text="Enviar Datos", bg=colorboton, command=lambda:fn_update())
 frame3_cargarBtn = tkinter.Button(editarInstrumentos, text="Cargar Datos", bg=colorboton, command=lambda:put_placeholders())
 frame3_btn = tkinter.Button(editarInstrumentos, text="Volver", bg=colorboton , command=lambda:show_frame(verInstrumentos))
 frame3_btn3 = tkinter.Button(editarInstrumentos, text="Salir",bg=colorboton , command=root.destroy)
+frame3_recargarCombobox =tkinter.Button(editarInstrumentos, text="Refresh Combobox",bg=colorboton , command=lambda:frame3_llenar_comboboxId())
 
 
 #CREAR LABELS DE LOS INPUTS
@@ -257,9 +269,10 @@ frame3_stockEntry.place(x = 150, y = 210, width=300)
 
 #POSICIONAR BOTONES 
 frame3_enviarBtn.place(x = 300, y = 250)
-frame3_cargarBtn.place(x = 150, y = 250)
+frame3_cargarBtn.place(x = 100, y = 250)
 frame3_btn.place(x = 710, y = 100, height=50,width=190)
 frame3_btn3.place(x = 710, y = 180, height=50,width=190)
+frame3_recargarCombobox.place(x=550, y=90)
 
 def fn_update():    
     id = frame3_idCombobox.get()
@@ -274,6 +287,8 @@ def fn_update():
 def put_placeholders():
     id = frame3_idCombobox.get()
     if id != ids[0]:
+        response = urlopen(url)
+        data_json = json.loads(response.read())   
         for i in data_json:
             idInstrumento = i["id_instrumento"]                                
             if int(id) == idInstrumento:  
@@ -314,6 +329,20 @@ closeBtn.place(x=350,y=360,height=50,width=200)
 nomproductoList = ["Seleccione..."]
 for i in data_json:
     nomproductoList.append(i["nombre"])
+    
+def frame4_llenar_comboboxNombre():    
+    response = urlopen(url)
+    data_json = json.loads(response.read())   
+    
+    contador = 0
+    nomproductoList.clear()
+    nomproductoList.append('Seleccione...')
+    frame4_productoCombobox.set('')
+    for i in data_json:
+        nomproductoList.append(i["nombre"])        
+        contador = contador+1
+    frame4_productoCombobox['values']=nomproductoList
+    frame4_productoCombobox.current(0)
 
 def calcular_totalVenta():
     venta=0
@@ -345,6 +374,7 @@ frame4_btn = tkinter.Button(ventaFrame, text="Volver", bg=colorboton , command=l
 frame4_btn3 = tkinter.Button(ventaFrame, text="Salir",bg=colorboton , command=root.destroy)
 frame4_calcularBtn = tkinter.Button(ventaFrame, text="Calcular Precio", bg=colorboton, command=lambda:calcular_totalVenta())
 frame4_realizarventaBtn = tkinter.Button(ventaFrame, text="Realizar Venta", bg=colorboton, command=lambda:update_stock())
+frame4_refrescarBtn = tkinter.Button(ventaFrame, text="Refrescar Combobox", bg=colorboton,command=lambda:frame4_llenar_comboboxNombre())
 
 #POSICIONAR LABELS
 frame4_tituloLabel.place(x = 80, y = 0)
@@ -356,12 +386,13 @@ frame4_totalLabel.place(x=50, y=170)
 frame4_btn.place(x = 710, y = 150, height=50,width=190)
 frame4_btn3.place(x = 710, y = 230, height=50,width=190)
 frame4_calcularBtn.place(x=350, y=240, height=50, width=190)
-frame4_realizarventaBtn.place(x=200, y=240, height=50, width=190)
+frame4_realizarventaBtn.place(x=120, y=240, height=50, width=190)
+frame4_refrescarBtn.place(x=470, y=90)
 
 #POSICIONAR WIDGETS
 frame4_productoCombobox.place(x=250, y=90, width=200)
 frame4_numEntry.place(x=250, y=130, width=200)
-frame4_totalsumLabel.place(x=250, y=170, width=200)
+frame4_totalsumLabel.place(x=200, y=170, width=200)
 
 def update_stock():
     nombre = frame4_productoCombobox.get()
